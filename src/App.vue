@@ -12,7 +12,7 @@ import { useSettingsStore } from '@/stores/settings.store'
 import { useGameEngine } from '@/composables/useGameEngine'
 
 /** Duración mínima de la intro, para que se sienta como el arranque de una app nativa. */
-const MIN_SPLASH_MS = 1500
+const MIN_SPLASH_MS = 5000
 
 const appStore = useAppStore()
 const playerStore = usePlayerStore()
