@@ -1,0 +1,6 @@
+export type { TransactionRepository } from './transaction.repository'
+export { DexieTransactionRepository } from './dexie-transaction.repository'
+export type { GoalRepository } from './goal.repository'
+export { DexieGoalRepository } from './dexie-goal.repository'
+export type { BudgetRepository } from './budget.repository'
+export { DexieBudgetRepository } from './dexie-budget.repository'

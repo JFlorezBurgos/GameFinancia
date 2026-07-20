@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-realm-950: #07040f;
+  --color-realm-900: #0f0a1e;
+  --color-realm-800: #1a1230;
+  --color-realm-700: #251a42;
+  --color-realm-600: #352560;
+  --color-realm-500: #4a3380;
+
+  --color-gold-400: #f5c842;
+  --color-gold-500: #e8b020;
+  --color-gold-600: #c9920f;
+
+  --color-emerald-400: #34d399;
+  --color-emerald-500: #10b981;
+
+  --color-coral-400: #fb7185;
+  --color-coral-500: #f43f5e;
+
+  --color-rarity-common: #94a3b8;
+  --color-rarity-uncommon: #34d399;
+  --color-rarity-rare: #60a5fa;
+  --color-rarity-epic: #a78bfa;
+  --color-rarity-legendary: #f5c842;
+  --color-rarity-mythic: #f472b6;
+
+  --font-display: 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Segoe UI', system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+  --radius-button: 0.875rem;
+}
+
+@layer base {
+  html {
+    @apply antialiased;
+    font-family: var(--font-body);
+  }
+
+  body {
+    @apply bg-realm-950 text-slate-100 min-h-dvh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgb(74 51 128 / 0.35), transparent),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgb(245 200 66 / 0.08), transparent);
+  }
+
+  #app {
+    @apply min-h-dvh;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-realm-800/60 backdrop-blur-md border border-white/5;
+  }
+
+  .text-gradient-gold {
+    @apply bg-gradient-to-r from-gold-400 to-gold-600 bg-clip-text text-transparent;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  /* Animación discreta del diorama del reino: leve "respiración" de la escena */
+  .kingdom-breathe {
+    animation: kingdom-breathe 12s ease-in-out infinite;
+  }
+}
+
+@keyframes kingdom-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.035);
+  }
+}
