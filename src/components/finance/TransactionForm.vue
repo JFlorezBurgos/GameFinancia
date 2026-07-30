@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import AppButton from '@/components/ui/AppButton.vue'
 import AppInput from '@/components/ui/AppInput.vue'
 import AppModal from '@/components/ui/AppModal.vue'
-import { getCategoriesByType } from '@/game'
+import { getSelectableCategoriesByType } from '@/game'
 import type { CreateTransactionInput, Transaction, TransactionType } from '@/types'
 import { getTodayKey } from '@/utils/format'
 
@@ -32,7 +32,7 @@ const isSubmitting = ref(false)
 
 const isEdit = computed(() => Boolean(props.transaction))
 
-const categories = computed(() => getCategoriesByType(props.type))
+const categories = computed(() => getSelectableCategoriesByType(props.type))
 
 const title = computed(() => {
   if (isEdit.value) {

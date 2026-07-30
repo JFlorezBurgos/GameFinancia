@@ -47,6 +47,12 @@ const router = createRouter({
           meta: { title: 'Metas' },
         },
         {
+          path: 'gastos-fijos',
+          name: 'fixed-expenses',
+          component: () => import('@/views/FixedExpensesView.vue'),
+          meta: { title: 'Gastos fijos' },
+        },
+        {
           path: 'perfil',
           name: 'profile',
           component: () => import('@/views/ProfileView.vue'),

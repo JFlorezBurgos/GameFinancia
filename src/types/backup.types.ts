@@ -1,4 +1,4 @@
-import type { BudgetPeriod, SavingsGoal, Transaction } from './finance.types'
+import type { BudgetPeriod, FixedExpense, SavingsGoal, Transaction } from './finance.types'
 import type { PlayerMedal, PlayerProfile } from './player.types'
 import type { AppSettings } from './settings.types'
 
@@ -10,7 +10,7 @@ export const BACKUP_APP_ID = 'reino-financiero'
  * Permite migrar respaldos antiguos en `restoreBackupPayload` sin romper
  * a los usuarios que actualizan la app.
  */
-export const BACKUP_SCHEMA_VERSION = 1
+export const BACKUP_SCHEMA_VERSION = 2
 
 /** Todo lo que realmente se persiste en Dexie y debe poder restaurarse tal cual. */
 export interface BackupData {
@@ -19,6 +19,7 @@ export interface BackupData {
   transactions: Transaction[]
   goals: SavingsGoal[]
   budgets: BudgetPeriod[]
+  fixedExpenses: FixedExpense[]
   medals: PlayerMedal[]
 }
 
@@ -47,6 +48,7 @@ export interface BackupSummary {
   transactions: number
   goals: number
   budgets: number
+  fixedExpenses: number
   medals: number
 }
 

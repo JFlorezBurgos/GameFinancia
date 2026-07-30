@@ -6,17 +6,17 @@ import { useGoalsStore } from '@/stores/goals.store'
 import type { KingdomSnapshot } from '@/types/kingdom.types'
 
 /**
- * Patrimonio neto visual = balance de movimientos + ahorro en metas.
- * Si baja, el reino retrocede a una etapa anterior.
+ * Patrimonio = caja real (sin restar fijos pendientes) + ahorro en metas.
+ * Los fijos pendientes solo reducen el disponible, no el patrimonio.
  */
 export const useKingdomStore = defineStore('kingdom', () => {
   const financeStore = useFinanceStore()
   const goalsStore = useGoalsStore()
 
   const netWorth = computed(() => {
-    const cashBalance = financeStore.allTimeSummary.balance
+    const cashOnHand = financeStore.allTimeSummary.cashOnHand
     const savings = goalsStore.totalSaved
-    return Math.max(0, cashBalance + savings)
+    return Math.max(0, cashOnHand + savings)
   })
 
   const snapshot = computed<KingdomSnapshot>(() =>

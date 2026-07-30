@@ -40,7 +40,15 @@ const { money } = useFinanceFormat()
           {{ transaction.note }}
         </p>
         <p v-else class="text-xs text-slate-500">
-          {{ transaction.type === 'income' ? 'Ingreso' : 'Gasto' }}
+          {{
+            transaction.source === 'goal-contribution'
+              ? 'Aporte a meta'
+              : transaction.source === 'fixed-expense'
+                ? 'Gasto fijo'
+                : transaction.type === 'income'
+                  ? 'Ingreso'
+                  : 'Gasto'
+          }}
         </p>
       </div>
 
@@ -53,6 +61,7 @@ const { money } = useFinanceFormat()
         </p>
         <div class="mt-1 flex justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100 max-sm:opacity-100">
           <button
+            v-if="transaction.source !== 'goal-contribution'"
             type="button"
             class="text-[10px] font-medium uppercase tracking-wide text-slate-400 hover:text-gold-400"
             @click="emit('edit', transaction)"

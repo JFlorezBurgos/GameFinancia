@@ -55,6 +55,9 @@ function handleSubmit(): void {
         <span class="font-semibold text-gold-400">
           {{ money(goal.currentAmount) }} / {{ money(goal.targetAmount) }}
         </span>
+        <p class="mt-1 text-xs text-slate-500">
+          El aporte se descuenta de tu balance disponible.
+        </p>
       </div>
 
       <AppInput

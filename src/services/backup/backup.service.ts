@@ -14,18 +14,21 @@ import {
  * armar/validar/restaurar la "foto" de los datos.
  */
 export async function createBackupPayload(): Promise<BackupPayload> {
-  const [settings, playerProfile, transactions, goals, budgets, medals] = await Promise.all([
-    db.settings.toArray(),
-    db.playerProfile.toArray(),
-    db.transactions.toArray(),
-    db.goals.toArray(),
-    db.budgets.toArray(),
-    db.medals.toArray(),
-  ])
+  const [settings, playerProfile, transactions, goals, budgets, fixedExpenses, medals] =
+    await Promise.all([
+      db.settings.toArray(),
+      db.playerProfile.toArray(),
+      db.transactions.toArray(),
+      db.goals.toArray(),
+      db.budgets.toArray(),
+      db.fixedExpenses.toArray(),
+      db.medals.toArray(),
+    ])
 
   const netWorth = Math.max(
     0,
-    calculateFinanceSummary(transactions).balance + calculateTotalSavings(goals),
+    calculateFinanceSummary(transactions, fixedExpenses).cashOnHand +
+      calculateTotalSavings(goals),
   )
   const kingdomSnapshot = kingdomEngine.buildSnapshotAtBalance(netWorth)
 
@@ -33,7 +36,7 @@ export async function createBackupPayload(): Promise<BackupPayload> {
     appId: BACKUP_APP_ID,
     schemaVersion: BACKUP_SCHEMA_VERSION,
     exportedAt: new Date().toISOString(),
-    data: { settings, playerProfile, transactions, goals, budgets, medals },
+    data: { settings, playerProfile, transactions, goals, budgets, fixedExpenses, medals },
     kingdom: {
       netWorth,
       stageId: kingdomSnapshot.currentStage.id,
@@ -90,6 +93,13 @@ export function validateBackupPayload(value: unknown): BackupPayload {
   assertArray(data.budgets, 'budgets')
   assertArray(data.medals, 'medals')
 
+  // v1 no tenía fixedExpenses; se normaliza a arreglo vacío.
+  if (data.fixedExpenses === undefined) {
+    data.fixedExpenses = []
+  } else {
+    assertArray(data.fixedExpenses, 'fixedExpenses')
+  }
+
   return raw as unknown as BackupPayload
 }
 
@@ -101,11 +111,27 @@ export function validateBackupPayload(value: unknown): BackupPayload {
  */
 export async function restoreBackupPayload(payload: BackupPayload): Promise<void> {
   const backup = validateBackupPayload(payload)
-  const { settings, playerProfile, transactions, goals, budgets, medals } = backup.data
+  const {
+    settings,
+    playerProfile,
+    transactions,
+    goals,
+    budgets,
+    fixedExpenses = [],
+    medals,
+  } = backup.data
 
   await db.transaction(
     'rw',
-    [db.settings, db.playerProfile, db.transactions, db.goals, db.budgets, db.medals],
+    [
+      db.settings,
+      db.playerProfile,
+      db.transactions,
+      db.goals,
+      db.budgets,
+      db.fixedExpenses,
+      db.medals,
+    ],
     async () => {
       await Promise.all([
         db.settings.clear(),
@@ -113,6 +139,7 @@ export async function restoreBackupPayload(payload: BackupPayload): Promise<void
         db.transactions.clear(),
         db.goals.clear(),
         db.budgets.clear(),
+        db.fixedExpenses.clear(),
         db.medals.clear(),
       ])
 
@@ -122,6 +149,7 @@ export async function restoreBackupPayload(payload: BackupPayload): Promise<void
         transactions.length ? db.transactions.bulkAdd(transactions) : Promise.resolve(),
         goals.length ? db.goals.bulkAdd(goals) : Promise.resolve(),
         budgets.length ? db.budgets.bulkAdd(budgets) : Promise.resolve(),
+        fixedExpenses.length ? db.fixedExpenses.bulkAdd(fixedExpenses) : Promise.resolve(),
         medals.length ? db.medals.bulkAdd(medals) : Promise.resolve(),
       ])
     },
@@ -134,6 +162,7 @@ export function summarizeBackup(data: BackupData, exportedAt: string): BackupSum
     transactions: data.transactions.length,
     goals: data.goals.length,
     budgets: data.budgets.length,
+    fixedExpenses: data.fixedExpenses?.length ?? 0,
     medals: data.medals.length,
   }
 }

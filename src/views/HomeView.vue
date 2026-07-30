@@ -8,6 +8,7 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import AppProgressBar from '@/components/ui/AppProgressBar.vue'
 import BudgetCard from '@/components/finance/BudgetCard.vue'
 import FinanceSummaryCard from '@/components/finance/FinanceSummaryCard.vue'
+import FixedExpensePreviewCard from '@/components/finance/FixedExpensePreviewCard.vue'
 import KingdomDiorama from '@/components/kingdom/KingdomDiorama.vue'
 import TransactionItem from '@/components/finance/TransactionItem.vue'
 import { getGoalProgress } from '@/game'
@@ -15,13 +16,16 @@ import { useFinanceFormat } from '@/composables/useFinanceFormat'
 import { useGameEngine } from '@/composables/useGameEngine'
 import { useBudgetStore } from '@/stores/budget.store'
 import { useFinanceStore } from '@/stores/finance.store'
+import { useFixedExpenseStore } from '@/stores/fixed-expense.store'
 import { useGoalsStore } from '@/stores/goals.store'
 import { useKingdomStore } from '@/stores/kingdom.store'
+import type { BudgetCategoryLimit } from '@/types'
 
 const router = useRouter()
 const financeStore = useFinanceStore()
 const goalsStore = useGoalsStore()
 const budgetStore = useBudgetStore()
+const fixedStore = useFixedExpenseStore()
 const kingdomStore = useKingdomStore()
 const { rewardBudgetMet } = useGameEngine()
 
@@ -33,6 +37,7 @@ const { snapshot } = storeToRefs(kingdomStore)
 const { month: formatMonth, money } = useFinanceFormat()
 
 const budgetStatus = computed(() => budgetStore.getStatusForMonth(selectedMonth.value))
+const fixedSummary = computed(() => fixedStore.getSummaryForMonth(selectedMonth.value))
 const featuredGoals = computed(() => activeGoals.value.slice(0, 2))
 
 async function confirmDelete(id: string): Promise<void> {
@@ -40,14 +45,22 @@ async function confirmDelete(id: string): Promise<void> {
   await financeStore.deleteTransaction(id)
 }
 
-async function handleBudgetSave(limit: number): Promise<void> {
+async function handleBudgetSave(categories: BudgetCategoryLimit[]): Promise<void> {
   try {
     await budgetStore.upsertBudget({
       month: selectedMonth.value,
-      limit,
+      categories,
     })
   } catch (err) {
     window.alert(err instanceof Error ? err.message : 'No se pudo guardar el presupuesto')
+  }
+}
+
+async function handleBudgetDelete(): Promise<void> {
+  try {
+    await budgetStore.deleteBudget(selectedMonth.value)
+  } catch (err) {
+    window.alert(err instanceof Error ? err.message : 'No se pudo eliminar el presupuesto')
   }
 }
 
@@ -70,10 +83,16 @@ async function handleBudgetClaim(): Promise<void> {
       :month-label="formatMonth(selectedMonth)"
     />
 
+    <FixedExpensePreviewCard
+      :summary="fixedSummary"
+      :month-label="formatMonth(selectedMonth)"
+    />
+
     <BudgetCard
       :status="budgetStatus"
       :month-label="formatMonth(selectedMonth)"
       @save="handleBudgetSave"
+      @delete="handleBudgetDelete"
       @claim="handleBudgetClaim"
     />
 

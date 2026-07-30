@@ -5,6 +5,7 @@ import AppSplash from '@/components/app/AppSplash.vue'
 import { useAppStore } from '@/stores/app.store'
 import { useBudgetStore } from '@/stores/budget.store'
 import { useFinanceStore } from '@/stores/finance.store'
+import { useFixedExpenseStore } from '@/stores/fixed-expense.store'
 import { useGoalsStore } from '@/stores/goals.store'
 import { useMedalsStore } from '@/stores/medals.store'
 import { usePlayerStore } from '@/stores/player.store'
@@ -19,6 +20,7 @@ const playerStore = usePlayerStore()
 const financeStore = useFinanceStore()
 const goalsStore = useGoalsStore()
 const budgetStore = useBudgetStore()
+const fixedExpenseStore = useFixedExpenseStore()
 const medalsStore = useMedalsStore()
 const settingsStore = useSettingsStore()
 const { syncAchievements } = useGameEngine()
@@ -42,6 +44,8 @@ onMounted(async () => {
     budgetStore.loadBudgets(),
     medalsStore.loadMedals(),
   ])
+  // Después de movimientos: puede migrar fijos legacy que vivían como transacciones.
+  await fixedExpenseStore.loadFixedExpenses()
   await syncAchievements()
 
   await minSplashElapsed

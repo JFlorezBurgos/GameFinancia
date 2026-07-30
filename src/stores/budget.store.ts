@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { buildBudgetStatus, markBudgetRewardClaimed } from '@/game'
+import {
+  buildBudgetStatus,
+  calculateBudgetTotalLimit,
+  markBudgetRewardClaimed,
+  normalizeBudgetPeriod,
+} from '@/game'
 import { DexieBudgetRepository } from '@/services/repositories'
 import { useFinanceStore } from '@/stores/finance.store'
 import type { BudgetPeriod, UpsertBudgetInput } from '@/types'
@@ -16,7 +21,7 @@ export const useBudgetStore = defineStore('budget', () => {
   const budgetByMonth = computed(() => {
     const map = new Map<string, BudgetPeriod>()
     for (const budget of budgets.value) {
-      map.set(budget.month, budget)
+      map.set(budget.month, normalizeBudgetPeriod(budget))
     }
     return map
   })
@@ -25,13 +30,13 @@ export const useBudgetStore = defineStore('budget', () => {
     return budgetByMonth.value.get(month) ?? null
   }
 
-  function getStatusForMonth(month: string) {
+  function getMonthTransactions(month: string) {
     const financeStore = useFinanceStore()
-    const spent = financeStore.transactions
-      .filter((t) => t.type === 'expense' && t.date.startsWith(month))
-      .reduce((sum, t) => sum + t.amount, 0)
+    return financeStore.transactions.filter((transaction) => transaction.date.startsWith(month))
+  }
 
-    return buildBudgetStatus(getBudgetForMonth(month), spent)
+  function getStatusForMonth(month: string) {
+    return buildBudgetStatus(getBudgetForMonth(month), getMonthTransactions(month))
   }
 
   const currentMonthStatus = computed(() => getStatusForMonth(getCurrentMonthKey()))
@@ -41,7 +46,8 @@ export const useBudgetStore = defineStore('budget', () => {
     error.value = null
 
     try {
-      budgets.value = await repository.getAll()
+      const loaded = await repository.getAll()
+      budgets.value = loaded.map(normalizeBudgetPeriod)
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Error al cargar presupuestos'
     } finally {
@@ -51,10 +57,21 @@ export const useBudgetStore = defineStore('budget', () => {
 
   async function upsertBudget(input: UpsertBudgetInput): Promise<BudgetPeriod> {
     const existing = getBudgetForMonth(input.month)
+    const categories = input.categories.map((category) => ({
+      categoryId: category.categoryId,
+      limit: Math.max(0, category.limit),
+    }))
+    const limit = calculateBudgetTotalLimit(categories)
+
+    if (limit <= 0) {
+      throw new Error('Define al menos un límite mayor a 0')
+    }
+
     const budget: BudgetPeriod = {
       id: input.month,
       month: input.month,
-      limit: input.limit,
+      limit,
+      categories,
       rewardClaimedAt: existing?.rewardClaimedAt,
     }
 
@@ -62,6 +79,11 @@ export const useBudgetStore = defineStore('budget', () => {
     const others = budgets.value.filter((item) => item.month !== input.month)
     budgets.value = [...others, budget]
     return budget
+  }
+
+  async function deleteBudget(month: string): Promise<void> {
+    await repository.delete(month)
+    budgets.value = budgets.value.filter((item) => item.month !== month)
   }
 
   async function claimBudgetReward(month: string): Promise<BudgetPeriod> {
@@ -90,6 +112,7 @@ export const useBudgetStore = defineStore('budget', () => {
     getStatusForMonth,
     loadBudgets,
     upsertBudget,
+    deleteBudget,
     claimBudgetReward,
   }
 })

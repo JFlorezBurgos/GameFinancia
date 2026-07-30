@@ -2,6 +2,7 @@ import Dexie, { type EntityTable } from 'dexie'
 import type {
   AppSettings,
   BudgetPeriod,
+  FixedExpense,
   PlayerProfile,
   SavingsGoal,
   Transaction,
@@ -18,6 +19,7 @@ export class RealmDatabase extends Dexie {
   transactions!: EntityTable<Transaction, 'id'>
   goals!: EntityTable<SavingsGoal, 'id'>
   budgets!: EntityTable<BudgetPeriod, 'id'>
+  fixedExpenses!: EntityTable<FixedExpense, 'id'>
   medals!: EntityTable<DbPlayerMedal, 'medalId'>
 
   constructor() {
@@ -50,6 +52,11 @@ export class RealmDatabase extends Dexie {
     this.version(3).stores({
       buildings: null,
       quests: null,
+    })
+
+    // v4: gastos fijos como entidad aparte (pagado/pendiente), fuera de movimientos.
+    this.version(4).stores({
+      fixedExpenses: 'id, month, createdAt',
     })
   }
 }

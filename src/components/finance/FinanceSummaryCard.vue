@@ -26,12 +26,15 @@ const { money, percent } = useFinanceFormat()
       </div>
 
       <div>
-        <p class="text-sm text-slate-400">Balance del periodo</p>
+        <p class="text-sm text-slate-400">Disponible (auxilio)</p>
         <p
           class="mt-1 text-3xl font-bold tracking-tight"
           :class="summary.balance >= 0 ? 'text-gradient-gold' : 'text-coral-400'"
         >
           {{ money(summary.balance) }}
+        </p>
+        <p class="mt-1 text-xs text-slate-500">
+          Después de fijos y aportes a metas. Los fijos no se tocan.
         </p>
       </div>
 
@@ -45,6 +48,12 @@ const { money, percent } = useFinanceFormat()
           <p class="mt-1 font-semibold text-coral-400">{{ money(summary.totalExpenses) }}</p>
         </div>
       </div>
+
+      <p v-if="summary.fixedTotal > 0" class="text-xs text-slate-500">
+        Reservado en fijos:
+        <span class="font-medium text-slate-300">{{ money(summary.fixedTotal) }}</span>
+        · Detalle en Gastos fijos
+      </p>
 
       <AppProgressBar
         :value="summary.savingsRate"

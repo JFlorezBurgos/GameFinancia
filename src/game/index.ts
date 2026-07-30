@@ -26,9 +26,19 @@ export {
   INCOME_CATEGORIES,
   EXPENSE_CATEGORIES,
   getCategoriesByType,
+  getSelectableCategoriesByType,
   getCategoryLabel,
   getCategoryIcon,
 } from './economy/categories.config'
+export {
+  BUDGET_CATEGORIES,
+  BUDGET_EXCLUDED_EXPENSE_CATEGORIES,
+  EXPENSE_TO_BUDGET_CATEGORY,
+  getBudgetCategoryId,
+  getBudgetCategoryLabel,
+  getBudgetCategoryIcon,
+} from './economy/budget-categories.config'
+export type { BudgetCategoryDefinition } from './economy/budget-categories.config'
 export {
   calculateFinanceSummary,
   filterTransactionsByMonth,
@@ -43,7 +53,20 @@ export {
   calculateTotalSavings,
   calculateTotalGoalTargets,
 } from './economy/goals.service'
-export { buildBudgetStatus, markBudgetRewardClaimed } from './economy/budget.service'
+export {
+  buildBudgetStatus,
+  markBudgetRewardClaimed,
+  normalizeBudgetPeriod,
+  calculateBudgetTotalLimit,
+  buildDefaultBudgetCategories,
+  sumBudgetRelevantExpenses,
+  sumExpensesByBudgetCategory,
+} from './economy/budget.service'
+export {
+  calculateFixedExpenseSummary,
+  sortFixedExpenses,
+  filterFixedExpensesByMonth,
+} from './economy/fixed-expense.service'
 export { processGameReward } from './rewards/rewards.service'
 export type { RewardResult } from './rewards/rewards.service'
 export { createGameEvent, transactionTypeToEvent } from './events/events.service'

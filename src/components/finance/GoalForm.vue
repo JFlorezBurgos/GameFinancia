@@ -130,6 +130,9 @@ function handleSubmit(): void {
         placeholder="0"
         :min="0"
       />
+      <p v-if="!isEdit" class="text-xs text-slate-500">
+        Si agregas un aporte inicial, se descuenta del balance.
+      </p>
 
       <AppInput v-model="deadline" label="Fecha límite (opcional)" type="date" />
 

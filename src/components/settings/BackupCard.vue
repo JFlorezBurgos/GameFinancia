@@ -76,6 +76,7 @@ async function handleExport(): Promise<void> {
       <p v-if="backupStore.lastExportSummary" class="text-center text-[11px] text-slate-500">
         Último respaldo: {{ backupStore.lastExportSummary.transactions }} movimientos ·
         {{ backupStore.lastExportSummary.goals }} metas ·
+        {{ backupStore.lastExportSummary.fixedExpenses }} fijos ·
         {{ backupStore.lastExportSummary.medals }} medallas
       </p>
     </div>
@@ -108,8 +109,8 @@ async function handleExport(): Promise<void> {
     >
       <div class="space-y-4">
         <p class="text-sm text-slate-300">
-          Se borrarán tus movimientos, metas, presupuestos, medallas y configuración actuales, y
-          se reemplazarán por los del archivo
+          Se borrarán tus movimientos, metas, presupuestos, gastos fijos, medallas y configuración
+          actuales, y se reemplazarán por los del archivo
           <span class="font-medium text-slate-100">{{ pendingFile?.name }}</span
           >. Esta acción no se puede deshacer.
         </p>
